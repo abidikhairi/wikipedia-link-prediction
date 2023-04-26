@@ -26,7 +26,7 @@ class LinkPredictor(nn.Module):
 
     def training_step(self, data):
         self.optimizer.zero_grad()
-        labels = data.edge_labels.float()
+        labels = data.edge_label.float()
         
         logits = self(data.x, data.edge_index)
         
@@ -39,7 +39,7 @@ class LinkPredictor(nn.Module):
 
     @torch.no_grad()
     def validation_step(self, data):
-        labels = data.edge_labels.float()
+        labels = data.edge_label.float()
 
         logits = self(data.x, data.edge_index)
         y_pred = torch.sigmoid(logits)

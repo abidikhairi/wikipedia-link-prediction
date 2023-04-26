@@ -27,6 +27,7 @@ wheels/
 MANIFEST
 
 # Lightning /research  
+scratchpad.py
 test_tube_exp/
 tests/tests_tt_dir/
 tests/save_dir

@@ -4,7 +4,7 @@ import logging
 def get_logger(name):
     datefmt = '%Y-%m-%d %H:%M:%S.%f' # e.g. 2023-02-15 19:45:30.9123457
 
-    logging.basicConfig(level=logging.NOTSET, datefmt=datefmt)
+    logging.basicConfig(level=logging.INFO, datefmt=datefmt)
     logger = logging.getLogger(name=name)
 
     logger.setLevel(logging.INFO)

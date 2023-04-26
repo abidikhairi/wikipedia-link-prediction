@@ -3,7 +3,6 @@ import torch
 import wandb
 import pandas as pd
 from tqdm import tqdm
-from torch_geometric.transforms import RandomLinkSplit
 
 from project.link_prediction import LinkPredictor
 from project.datasets.wikipedia import Wikipedia, WikipediaTest
@@ -14,8 +13,6 @@ def main(args):
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    valid_size = args.valid_size
-    test_size = args.test_size
     nhids = args.nhids
     learning_rate = args.learning_rate
     max_epochs = args.max_epochs
@@ -24,24 +21,23 @@ def main(args):
 
     data_root = "./data" if args.wandb else "./default"
 
-    config = {"valid_size": valid_size, "test_size": test_size, "nhids": nhids, "learning_rate": learning_rate,
-            "max_epochs": max_epochs}
+    config = {"nhids": nhids, "learning_rate": learning_rate, "max_epochs": max_epochs}
     
     logger.info(f"starting wandb experiment ({experim_name})")
+
     wandb.init(project="dsaa-23", entity="flursky", config=config, name=experim_name)
 
-    transform = RandomLinkSplit(num_val=valid_size, num_test=test_size)
-    dataset = Wikipedia(root=data_root, transform=transform)
+    dataset = Wikipedia(root=data_root)
     
-    train_data, valid_data, test_data = dataset[0]
+    train_data = dataset[0]
+    valid_data = dataset[1]
+    test_data = dataset[2]
 
     train_data = train_data.to(device)
     valid_data = valid_data.to(device)
     test_data = test_data.to(device)
 
     nfeats = dataset.num_features
-
-    assert test_size + valid_size < 1.0, "test_size + valid_size must be < 1.0"
 
     model = LinkPredictor(nfeats=nfeats, nhids=nhids, learning_rate=learning_rate, device=device)
 
@@ -101,9 +97,6 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-
-    parser.add_argument('--valid_size', default=0.4, type=float, help="Validation edges size. Default: 0.4")
-    parser.add_argument('--test_size', default=0.2, type=float, help="Training edges size. Default: 0.2")
 
     parser.add_argument('--nhids', default=16, type=int, help="Number of hidden units. Default: 16")
     parser.add_argument('--learning_rate', default=0.001, type=float, help="Learning rate. Default: 0.001")
