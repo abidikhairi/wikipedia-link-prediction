@@ -32,9 +32,9 @@ tests/tests_tt_dir/
 tests/save_dir
 default/   
 data/
+staging/
 test_tube_logs/
 test_tube_data/
-datasets/
 model_weights/
 tests/save_dir  
 tests/tests_tt_dir/

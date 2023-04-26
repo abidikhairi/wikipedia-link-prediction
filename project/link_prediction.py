@@ -1,7 +1,7 @@
-import torch.nn as nn
+import torch
+from torch import nn
 from torch.optim import Adam
 from torchmetrics import F1Score
-from torch import binary_cross_entropy_with_logits
 
 from project.models import GCNEncoder, DotProductPredictor
 
@@ -15,10 +15,10 @@ class LinkPredictor(nn.Module):
         self.encoder = GCNEncoder(nfeats, nhids)
         self.predictor = DotProductPredictor(self.encoder).to(device)
 
-        self.loss_fn = binary_cross_entropy_with_logits
+        self.loss_fn = nn.BCEWithLogitsLoss()
         self.optimizer = Adam(self.predictor.parameters(), lr=self.learning_rate, weight_decay=5e-4)
 
-        self.f1_score = F1Score(task='binary')
+        self.f1_score = F1Score(task='binary').to(device)
     
 
     def forward(self, x, edge_index):
@@ -26,18 +26,26 @@ class LinkPredictor(nn.Module):
 
     def training_step(self, data):
         self.optimizer.zero_grad()
+        labels = data.edge_labels.float()
         
         logits = self(data.x, data.edge_index)
-        loss = self.loss_fn(logits, data.edge_labels)
         
-        import pdb; pdb.set_trace()
+        loss = self.loss_fn(logits, labels)
+
+        loss.backward()
+        self.optimizer.step()
 
         return loss
 
-
+    @torch.no_grad()
     def validation_step(self, data):
-        logits = self(data.x, data.edge_index)
-        import pdb; pdb.set_trace()
-        loss = self.loss_fn(logits, data.edge_labels)
+        labels = data.edge_labels.float()
 
-        return loss
+        logits = self(data.x, data.edge_index)
+        y_pred = torch.sigmoid(logits)
+
+        loss = self.loss_fn(logits, labels)
+
+        f1_score = self.f1_score(y_pred, labels)
+
+        return loss, f1_score

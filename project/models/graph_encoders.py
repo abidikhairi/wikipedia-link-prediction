@@ -32,9 +32,7 @@ class DotProductPredictor(nn.Module):
         src = edge_index[0, :]
         tgt = edge_index[1, :]
 
-        h_src = h[src]
-        h_tgt = h[tgt]
+        h_src = h.index_select(0, src)
+        h_tgt = h.index_select(0, tgt)
 
-        return torch.matmul(h_src, h_tgt.t()).sum(dim=-1)
-
-        
+        return torch.bmm(h_src.unsqueeze(1), h_tgt.unsqueeze(2)).squeeze()
