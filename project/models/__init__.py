@@ -1,1 +1,3 @@
-from project.models.graph_encoders import DotProductPredictor, GCNEncoder, DGCNEncoder
+from project.models.graph_encoders import GCNEncoder, DGCNEncoder
+from project.models.predictors import DotProductPredictor, MLPPredictor
+ 
