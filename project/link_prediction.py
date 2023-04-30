@@ -3,7 +3,7 @@ from torch import nn
 from torch.optim import Adam
 from torchmetrics import F1Score
 
-from project.models import GCNEncoder, DotProductPredictor, DGCNEncoder
+from project.models import GCNEncoder, DotProductPredictor, DGCNEncoder, MLPPredictor
 
 
 class LinkPredictor(nn.Module):
@@ -13,7 +13,7 @@ class LinkPredictor(nn.Module):
         self.learning_rate = learning_rate
 
         self.encoder = DGCNEncoder(nfeats, nhids)
-        self.predictor = DotProductPredictor(self.encoder).to(device)
+        self.predictor = MLPPredictor(encoder=self.encoder, nfeats=nhids).to(device)
 
         self.loss_fn = nn.BCEWithLogitsLoss()
         self.optimizer = Adam(self.predictor.parameters(), lr=self.learning_rate, weight_decay=5e-4)
